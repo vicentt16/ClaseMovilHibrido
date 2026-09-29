@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/ExamenUnidad1/productosScreen.dart';
 import 'package:flutter_application_2/api/carts.dart';
 
 class CarritoCompras extends StatefulWidget {
@@ -28,6 +29,31 @@ class _CarritoComprasState extends State<CarritoCompras> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Carrito de Compras'),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProductosScreen(),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.storefront),
+            label: 'Productos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Carrito',
+          ),
+        ],
       ),
       body: FutureBuilder<List<Cart>>(
         future: _carts,
@@ -64,6 +90,12 @@ class _CarritoComprasState extends State<CarritoCompras> {
             separatorBuilder: (context, index) => const SizedBox(height: 24),
             itemBuilder: (context, index) {
               final cart = carts[index];
+              final cartItems = [...cart.items, ...CartManager.itemsForCart(cart.id)];
+              final total = cartItems.fold<double>(
+                0,
+                (sum, item) => sum + (item.price * item.quantity),
+              );
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -71,12 +103,12 @@ class _CarritoComprasState extends State<CarritoCompras> {
                     'Carrito #${cart.id}',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  if (cart.items.isEmpty)
+                  if (cartItems.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Text('Este carrito no tiene productos.'),
                     ),
-                  ...cart.items.map(
+                  ...cartItems.map(
                     (item) => ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: item.image.isEmpty
@@ -93,8 +125,22 @@ class _CarritoComprasState extends State<CarritoCompras> {
                       subtitle: Text(
                         '${item.quantity} x \$${item.price.toStringAsFixed(2)}',
                       ),
-                      trailing: Text(
-                        '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                CartManager.removeProduct(cart.id, item.title);
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -102,7 +148,7 @@ class _CarritoComprasState extends State<CarritoCompras> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'Total: \$${cart.total.toStringAsFixed(2)}',
+                      'Total: \$${total.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),

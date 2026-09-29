@@ -13,7 +13,7 @@ Future<List<dynamic>> fetchUsers() async {
 
 Future<dynamic> fetchUsario(String id) async {
 
-  final response = await http.get(Uri.parse("https://jsonplaceholder.typicode.com/users/"+id));
+  final response = await http.get(Uri.parse("https://jsonplaceholder.typicode.com/users/$id"));
 
   if(response.statusCode == 200){
     return jsonDecode(response.body);

@@ -1,6 +1,52 @@
 import 'dart:convert';
 
+import 'package:flutter_application_2/ExamenUnidad1/producto.dart';
 import 'package:http/http.dart' as http;
+
+class CartManager {
+  static final Map<int, List<CartItem>> _cartItemsById = {};
+
+  static List<CartItem> itemsForCart(int cartId) {
+    return List.unmodifiable(_cartItemsById[cartId] ?? const <CartItem>[]);
+  }
+
+  static void addProduct(Producto product, int cartId) {
+    final items = _cartItemsById.putIfAbsent(cartId, () => <CartItem>[]);
+    final index = items.indexWhere((item) => item.title == product.title);
+
+    if (index >= 0) {
+      final current = items[index];
+      items[index] = CartItem(
+        title: current.title,
+        image: current.image,
+        price: current.price,
+        quantity: current.quantity + 1,
+      );
+      return;
+    }
+
+    items.add(
+      CartItem(
+        title: product.title,
+        image: product.image,
+        price: product.price,
+        quantity: 1,
+      ),
+    );
+  }
+
+  static void removeProduct(int cartId, String productTitle) {
+    final items = _cartItemsById[cartId];
+    if (items == null) return;
+
+    items.removeWhere((item) => item.title == productTitle);
+    if (items.isEmpty) {
+      _cartItemsById.remove(cartId);
+    }
+  }
+
+  static void clear() => _cartItemsById.clear();
+}
 
 class Cart {
   const Cart({required this.id, required this.items});

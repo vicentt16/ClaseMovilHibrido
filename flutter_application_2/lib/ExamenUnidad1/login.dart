@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/ExamenUnidad1/productosScreen.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -6,12 +7,9 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text('Inicio de Sesión'),
       ),
-
-
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,15 +38,20 @@ class Login extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
-            const ElevatedButton(
-              onPressed: null, // logica de loggin
-              child: Text('Iniciar Sesión'),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProductosScreen(),
+                  ),
+                );
+              },
+              child: const Text('Iniciar Sesión'),
             ),
-          ]      
+          ],
         ),
       ),
     );
   }
-
 }
